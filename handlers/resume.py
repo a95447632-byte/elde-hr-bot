@@ -485,7 +485,7 @@ def generate_resume_pdf(data, filename):
         ["Tug'ilgan sana", data.get("birthdate","")],
         ["Jins", data.get("gender","")],
         ["Oilaviy holat", data.get("marital","")],
-        ["Ta'lim", data.get("education","")]
+        ["Ta'lim darajasi ", data.get("education","")]
     ]
     elements.append(make_table(left_data))
 
@@ -494,21 +494,21 @@ def generate_resume_pdf(data, filename):
     right_data = [
         ["Filial", data.get("branch_name","")],
         ["Vakansiya", data.get("vacancy_name","")],
-        ["Manzil", data.get("address","")]
+        ["Yashash Manzil", data.get("address","")]
     ]
     elements.append(make_table(right_data))
 
     # 🔥 ISH TAJRIBASI
     elements.append(Paragraph("Ish tajribasi", section_title))
     exp_data = [
-        ["Tashkilot", data.get("exp_org","")],
+        ["Tashkilot nomi ", data.get("exp_org","")],
         ["Lavozim", data.get("exp_pos","")],
         ["Davr", data.get("exp_period","")]
     ]
     elements.append(make_table(exp_data))
 
     # 🔥 TILLAR + MAOSH
-    elements.append(Paragraph("Qo‘shimcha", section_title))
+    elements.append(Paragraph("Til bilish darajasi va maosh", section_title))
     extra = [
         ["O'zbek tili", data.get("uzbek","")],
         ["Rus tili", data.get("russian","")],
