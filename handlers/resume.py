@@ -369,13 +369,15 @@ async def get_privacy(msg: Message, state: FSMContext):
         await state.clear()
         return
 
-    await state.update_data(privacy=msg.text)
+    await state.update_data(privacy=msg.text,
+                            telegram_username = msg.from_user.username or "no_username")
     data = await state.get_data()
 
-    summary = t("resume_summary", lang).format(
+    summary = t("resume_summary", lang).format(   
         branch_name=data.get("branch_name", ""),
         vacancy_name=data.get("vacancy_name", ""),
         fullname=data.get("fullname", ""),
+        telegram_username=data.get("username",""),
         address=data.get("address", ""),
         phone=data.get("phone", ""),
         birthdate=data.get("birthdate", ""),
@@ -571,6 +573,7 @@ async def confirm_resume(msg: Message, state: FSMContext):
                 f"🆕 YANGI REZYUME\n\n"
                 f"👤 {data.get('fullname','')}\n"
                 f"📞 {data.get('phone','')}\n"
+                f"💬 https://t.me/{data.get('telegram_username','')}\n"
                 f"🏢 {data.get('branch_name','')}\n"
                 f"💼 {data.get('vacancy_name','')}"
             )

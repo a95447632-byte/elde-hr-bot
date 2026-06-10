@@ -98,5 +98,9 @@ VACANCIES = {
     "contract_specialist": {
         "title_uz": "Shartnoma hodimi",
         "title_ru": "Специалист по договорам"
+    },
+    "HR_kadrlar_bolimi":{
+        "title_uz":"HR Kadrlar Bolimi",
+        "title_ru":"HR Специалист "
     }
 }
