@@ -16,7 +16,7 @@ class ResumeState(StatesGroup):
     gender    = State()
     marital   = State()
     education = State()
-    
+    occupation = State()
     exp_org   = State()
     exp_pos   = State()
     exp_period = State()

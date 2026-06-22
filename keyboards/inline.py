@@ -13,10 +13,12 @@ def branch_keyboard(branches):
     return InlineKeyboardMarkup(inline_keyboard=buttons)
 
 
-def vacancy_keyboard(vacancies):
+def vacancy_keyboard(vacancies, lang):
     buttons = [
         [InlineKeyboardButton(
-            text=vacancy["title"],
+            # Bazadan 'title_uz' emas, shunchaki 'title' kaliti kelyapti.
+            # Tillarni saralash ishini SQL'ning o'zi (db/queries.py) bajarib bo'lgan!
+            text=vacancy["title"], 
             callback_data=f"vac_{vacancy['id']}"
         )]
         for vacancy in vacancies

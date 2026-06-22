@@ -70,7 +70,7 @@ async def branch_selected(call: CallbackQuery, state: FSMContext):
         return
 
     await state.set_state(ResumeState.vacancy)
-    await call.message.answer(t("choose_vacancy", lang), reply_markup=vacancy_keyboard(vacancies))
+    await call.message.answer(t("choose_vacancy", lang), reply_markup=vacancy_keyboard(vacancies,lang))
     await call.answer()
 
 
@@ -216,8 +216,21 @@ async def get_education_all(msg: Message, state: FSMContext):
         return
 
     await state.update_data(education=msg.text)
+    await state.set_state(ResumeState.occupation)
+    await msg.answer(t("ask_occupation", lang),reply_markup=ReplyKeyboardRemove() )
+
+
+#---- occupation -- mutahasisligi
+@router.message(ResumeState.occupation)
+async def get_occupation(msg:Message, state:FSMContext):
+    lang = await _lang(state)
+    if not msg.text :
+        await msg.answer(te("err_button", lang))
+        return
+    await state.update_data(occupation=msg.text)
     await state.set_state(ResumeState.exp_org)
-    await msg.answer(t("ask_exp_org", lang), reply_markup=exp_keyboard(lang))
+    await msg.answer(t("ask_exp_org",lang),reply_markup=exp_keyboard(lang))
+
 
 
 # ── Ish tajribasi ─────────────────────────────────────────────────────────────
@@ -384,6 +397,7 @@ async def get_privacy(msg: Message, state: FSMContext):
         gender=data.get("gender", ""),
         marital=data.get("marital", ""),
         education=data.get("education", ""),
+        occupation=data.get("occupation",""),
         exp_org=data.get("exp_org", ""),
         exp_pos=data.get("exp_pos", ""),
         exp_period=data.get("exp_period", ""),
@@ -417,7 +431,7 @@ def generate_resume_pdf(data, filename):
     else:
         font_name = "Helvetica"
 
-    doc = SimpleDocTemplate(filepath, pagesize=A4)
+    doc = SimpleDocTemplate(filepath, pagesize=A4, rightMargin=1.5*cm, leftMargin=1.5*cm, topMargin=1.5*cm, bottomMargin=1.5*cm)
     styles = getSampleStyleSheet()
 
     # 🔥 STYLELAR
@@ -432,7 +446,7 @@ def generate_resume_pdf(data, filename):
         name="Header",
         fontName=font_name,
         fontSize=14,
-        leading=16,
+        leading=18,
         spaceAfter=10
     )
 
@@ -440,8 +454,8 @@ def generate_resume_pdf(data, filename):
         name="Section",
         fontName=font_name,
         fontSize=12,
-        spaceBefore=10,
-        spaceAfter=5,
+        spaceBefore=12,
+        spaceAfter=6,
         textColor=colors.darkgreen
     )
 
@@ -451,7 +465,7 @@ def generate_resume_pdf(data, filename):
     photo_path = data.get("photo_path")
 
     if photo_path and os.path.exists(photo_path):
-        img = Image(photo_path, width=4*cm, height=6*cm)
+        img = Image(photo_path, width=4*cm, height=5*cm)
     else:
         img = Paragraph("", normal)
 
@@ -461,23 +475,33 @@ def generate_resume_pdf(data, filename):
     📞 {data.get("phone","")}
     """, header_style)
 
-    header_table = Table([[img, header_text]], colWidths=[4*cm, 12*cm])
+    header_table = Table([[img, header_text]], colWidths=[4*cm, 14*cm])
     header_table.setStyle(TableStyle([
         ('VALIGN', (0,0), (-1,-1), 'MIDDLE'),
-        ('LEFTPADDING', (0,0), (-1,-1), 10),
+        ('LEFTPADDING', (1,0), (1,0), 15),
     ]))
 
     elements.append(header_table)
-    elements.append(Spacer(1, 15))
+    elements.append(Spacer(1, 10))
 
-    # 🔥 TABLE FUNKSIYA
+    # 🔥 JADVAL YARATISH FUNKSIYASI (Paragraph bilan optimizatsiya qilindi)
     def make_table(data_list):
-        t = Table(data_list, colWidths=[6*cm, 7*cm])
+        # Har bir matnni Paragraph ichiga olamiz, shunda u sig'maganda avtomatik tagiga tushadi
+        formatted_data = []
+        for row in data_list:
+            cell_left = Paragraph(str(row[0]), normal)
+            cell_right = Paragraph(str(row[1]), normal)
+            formatted_data.append([cell_left, cell_right])
+            
+        # A4 sahifasi kengligi ~18cm bo'sh joy qolishini hisobga olib o'lcham beramiz
+        t = Table(formatted_data, colWidths=[6*cm, 12*cm])
         t.setStyle(TableStyle([
             ('GRID', (0,0), (-1,-1), 0.3, colors.grey),
-            ('FONTNAME', (0,0), (-1,-1), font_name),
-            ('FONTSIZE', (0,0), (-1,-1), 10),
+            ('VALIGN', (0,0), (-1,-1), 'TOP'),  # Matn uzun bo'lsa tepadan tekislansin
+            ('TOPPADDING', (0,0), (-1,-1), 6),
             ('BOTTOMPADDING', (0,0), (-1,-1), 6),
+            ('LEFTPADDING', (0,0), (-1,-1), 6),
+            ('RIGHTPADDING', (0,0), (-1,-1), 6),
         ]))
         return t
 
@@ -487,7 +511,8 @@ def generate_resume_pdf(data, filename):
         ["Tug'ilgan sana", data.get("birthdate","")],
         ["Jins", data.get("gender","")],
         ["Oilaviy holat", data.get("marital","")],
-        ["Ta'lim darajasi ", data.get("education","")]
+        ["Ta'lim darajasi ", data.get("education","")],
+        ["Mutahasisligi ", data.get("occupation","")]
     ]
     elements.append(make_table(left_data))
 
@@ -518,8 +543,6 @@ def generate_resume_pdf(data, filename):
     ]
     elements.append(make_table(extra))
 
-    elements.append(Spacer(1, 10))
-
     doc.build(elements)
     return filepath
 
@@ -539,7 +562,7 @@ async def confirm_resume(msg: Message, state: FSMContext):
     data = await state.get_data()
 
     if msg.text != t("confirm_prompt", lang):
-        await msg.answer(t("err_button", lang))
+
         return
 
     filename = f"resume_{msg.from_user.id}.pdf"

@@ -36,6 +36,7 @@ TEXTS = {
     "ask_gender":      "Jins:",
     "ask_marital":     "Oilaviy holat:",
     "ask_education":   "Ta'lim darajasi:",
+    "ask_occupation":   "Mutahasisligi",
     "ask_exp_org":     "Ishlagan tashkilot nomi (bo'lmasa «Yo'q» yozing):",
     "ask_exp_pos":     "Lavozim:",
     "ask_exp_period":  "Ishlagan vaqt (masalan: 2022-2024):",

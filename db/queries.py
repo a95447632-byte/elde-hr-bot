@@ -31,13 +31,13 @@ def get_branch_by_id(branch_id):
     conn.close()
     return result
 
-
 def get_vacancies_by_branch(branch_id, lang="uz"):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)
 
     title_field = "title_uz" if lang == "uz" else "title_ru"
 
+    # GROUP BY qismidan dinamik fieldni olib tashlab, v.id bo'yicha guruhlaymiz
     cursor.execute(f"""
         SELECT 
             v.id,
@@ -46,13 +46,12 @@ def get_vacancies_by_branch(branch_id, lang="uz"):
         FROM vacancies v
         LEFT JOIN branch_vacancies bv 
             ON v.id = bv.vacancy_id AND bv.branch_id = %s
-        GROUP BY v.id, v.{title_field}
+        GROUP BY v.id
     """, (branch_id,))
 
     result = cursor.fetchall()
     conn.close()
     return result
-
 def get_vacancy_by_id(vacancy_id):
     conn = get_connection()
     cursor = conn.cursor(dictionary=True)

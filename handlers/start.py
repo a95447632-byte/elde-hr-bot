@@ -72,7 +72,7 @@ async def vacancies_handler(msg: Message, state: FSMContext):
     data = await state.get_data()
     lang = data.get("lang", "uz")
 
-    await state.clear()  # 🔥 MUHIM
+    #await state.clear()  # 🔥 MUHIM
     await state.set_state(ResumeState.branch)
 
     branches = get_branches(lang)
